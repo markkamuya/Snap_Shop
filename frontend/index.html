@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapShop: Find Cheapest Store & Crowdsourcing</title>
+    <!-- Meta Description for search engines -->
+    <meta name="description" content="SnapShop helps you find the cheapest stores for your favorite products. Compare prices, check reviews, and use crowdsourcing to get better deals.">
+
+    <!-- Keywords for search engines -->
+    <meta name="keywords" content="SnapShop, cheapest store, crowdsourcing, price comparison, find cheapest store, best deals, product comparison, shopping, discounts, e-commerce">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white; /* Background set to white */
+            color: #333;
+        }
+
+        nav {
+            background-color: #3b82f6; /* Blue navigation bar */
+            display: flex;
+            align-items: center;
+            justify-content: center; /* This will ensure space between elements */
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        nav .brand {
+            font-size: 1.5em;
+            color: white;
+            font-weight: bold;
+            position: absolute; /* Position the brand at the top-left corner */
+            left: 20px;
+        }
+        nav .nav-links {
+            display: flex;
+            gap: 100px; /* Space between the links */
+            
+        }
+        nav a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: color 0.3s;
+            margin: 0 30px; /* Add space between the tabs */
+        }
+
+        nav a:hover {
+            color: #ff6f00; /* Hover effect with orange */
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        section {
+            padding: 20px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        section.hidden {
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        h1, h2 {
+            color: #3b82f6; /* Blue for headings */
+        }
+
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: calc(100% - 20px);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #3b82f6; /* Button background in blue */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #1d63b1; /* Darker blue on hover */
+        }
+
+        #result, #crowdsourcingResult {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #result:hover, #crowdsourcingResult:hover {
+            background-color: #f0f0f0;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #3b82f6; /* Footer background in blue */
+            color: white;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .store-result {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .store-result:hover {
+            background-color: #bbdefb;
+        }
+        @media (max-width: 768px) {
+            nav .nav-links {
+                flex-direction: column; /* Stack the nav items vertically */
+                gap: 10px; /* Reduce space between links */
+                margin-top: 10px; /* Bring links closer to the brand name */
+            }
+
+            nav .brand {
+                position: relative; /* Reset position to default for mobile */
+                font-size: 1.5em; /* Smaller brand text */
+                top: 0;
+            }
+        }
+        /* Adjusting for mobile devices */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column; /* Stack the nav items vertically */
+                align-items: center; /* Center the nav items */
+                justify-content: flex-start;
+            }
+
+            nav .brand {
+                position: relative; /* Reset position to default */
+                top: 0;
+                font-size: 1.5em; /* Smaller brand text */
+                margin-bottom: 10px; /* Add some space between brand and links */
+            }
+
+            nav .nav-links {
+                display: flex;
+                flex-direction: column; /* Stack the nav links vertically */
+                gap: 10px; /* Space between the links */
+                align-items: center; /* Center the links */
+            }
+
+            nav a {
+                font-size: 16px; /* Adjust font size for mobile */
+            }
+        }
+        /* General styling for the result container */
+        #result {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling for the card container */
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Hover effects for cards */
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Styling for product name and description within cards */
+        .product-card {
+            margin-bottom: 10px;
+        }
+
+        .product-card strong {
+            font-weight: bold;
+        }
+
+        /* Titles for sections */
+        h3 {
+            text-align: center;
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        /* Styling for "Cheapest" and "Best Quality" sections */
+        .cheapest-card {
+            border-left: 5px solid #4CAF50;  /* Green for cheapest */
+        }
+
+        .best-quality-card {
+            border-left: 5px solid #2196F3;  /* Blue for best quality */
+        }
+
+        /* Styling for links inside product cards */
+        a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .card {
+                padding: 15px;
+            }
+            h3 {
+                font-size: 1.25rem;
+            }
+        }
+
+
+    </style>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCovyxC92-oKpXIv_IfArVsuQFq92zhniw&callback=initMap"></script>
+</head>
+<body>
+    <nav>
+        <span class="brand">SnapShop</span> <!-- SnapShop text aligned to the left -->
+        <div>
+            <a href="#" id="findStoreTab">Find Cheapest Store</a>
+            <a href="#" id="crowdsourcingTab">Crowdsourcing</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="findStoreSection" class="active">
+            <h1>Find the Cheapest Store</h1>
+            <label for="product">Product Name:</label>
+            <input type="text" id="product" placeholder="Enter product name" required>
+            <label for="radius">Search Radius (km):</label>
+            <input type="number" id="radius" placeholder="Enter radius" step="any" required>
+            <button id="findButton"><i class="fas fa-search"></i> Find Store</button>
+            <h2>Result:</h2>
+            <div id="result"></div>
+            <div id="travelInfo" style="display: none;">
+                <h2>Travel Information:</h2>
+                <p id="travelTime"></p>
+                <p id="travelDistance"></p>
+                <p><a id="storeLink" href="#" target="_blank">View Store Location on Map</a></p>
+            </div>
+        </section>
+
+        <section id="crowdsourcingSection" class="hidden">
+            <h1>Crowdsourcing Contributions</h1>
+            <p>Please enter the following details:</p>
+            <form id="crowdsourcing-form">
+                <label for="category">Category:</label>
+                <input type="text" id="category" name="category" required>
+                <label for="subcategory">Subcategory:</label>
+                <input type="text" id="subcategory" name="subcategory" required>
+                <label for="name">Product Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="store">Store:</label>
+                <input type="text" id="store" name="store" required>
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" step="any" required>
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" required>
+                <label for="storeLocation">Store Location (lat,lng):</label>
+                <input type="text" id="storeLocation" name="storeLocation" required>
+                <button type="submit"><i class="fas fa-paper-plane"></i> Submit</button>
+            </form>
+            <pre id="crowdsourcingResult"></pre>
+        </section>
+
+        <div id="map"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 SnapShop. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let storeLocation; // Store location from API response
+        let map; // Declare map variable
+        let directionsRenderer; // Directions renderer
+        const userLocation = { lat: 37.783563, lng: -122.409437 }; // Fixed user location
+        let storeMarker; // Variable to store the store marker
+        let userMarker; // Variable to store the user marker
+    
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: userLocation,
+                zoom: 14,
+            });
+    
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+            });
+    
+            userMarker = new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                title: "You are here",
+                icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            });
+        }
+    
+        function calculateRoute(storeLocation) {
+            const directionsService = new google.maps.DirectionsService();
+    
+            const request = {
+                origin: userLocation,
+                destination: storeLocation,
+                travelMode: google.maps.TravelMode.DRIVING,
+            };
+    
+            directionsService.route(request, function (result, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    directionsRenderer.setDirections(result);
+                    const route = result.routes[0].legs[0];
+                    document.getElementById("travelTime").innerText = `Time: ${route.duration.text}`;
+                    document.getElementById("travelDistance").innerText = `Distance: ${route.distance.text}`;
+                    document.getElementById("storeLink").href = `https://www.google.com/maps?q=${storeLocation.lat},${storeLocation.lng}`;
+                    document.getElementById("travelInfo").style.display = "block";
+                }
+            });
+        }
+    
+        // Event listeners for switching tabs
+        document.getElementById("findStoreTab").addEventListener("click", function () {
+            document.getElementById("findStoreSection").classList.add("active");
+            document.getElementById("findStoreSection").classList.remove("hidden");
+            document.getElementById("crowdsourcingSection").classList.remove("active");
+            document.getElementById("crowdsourcingSection").classList.add("hidden");
+        });
+    
+        document.getElementById("crowdsourcingTab").addEventListener("click", function () {
+            document.getElementById("crowdsourcingSection").classList.add("active");
+            document.getElementById("crowdsourcingSection").classList.remove("hidden");
+            document.getElementById("findStoreSection").classList.remove("active");
+            document.getElementById("findStoreSection").classList.add("hidden");
+        });
+
+
+        document.getElementById("findButton").addEventListener("click", function () {
+            const product = document.getElementById("product").value;
+            const radius = parseFloat(document.getElementById("radius").value);
+            const resultElement = document.getElementById("result");
+
+            // Clear previous results
+            resultElement.innerHTML = '';
+
+            // Send POST request to find the cheapest store
+            fetch("/find_cheapest_store", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ product: product, radius: radius }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);  // Log to inspect the response structure
+
+                // Check for any error in the response
+                if (data.error) {
+                    resultElement.textContent = data.error;
+                    return;
+                }
+
+                // Ensure data is in the expected format
+                if (data.products && Array.isArray(data.products)) {
+                    const products = data.products;
+                    const cheapestProduct = data.cheapest_product;
+                    const highestRatedProduct = data.highest_rated_product;
+
+                    // Display the cheapest product with full data
+                    const cheapestProductElement = document.createElement("div");
+                    cheapestProductElement.classList.add("card", "cheapest-card");
+                    cheapestProductElement.innerHTML = `
+                        <h3>Cheapest Products Per Store:</h3>
+                        <div class="product-card">
+                            <strong>Product Name:</strong> ${cheapestProduct.title}<br>
+                            <strong>Price:</strong> $${cheapestProduct.price}<br>
+                            <strong>Link to Store:</strong> <a href="${cheapestProduct.url}" target="_blank">View Product</a><br>
+                            <strong>Rating:</strong> ${cheapestProduct.rating || "No ratings available"}<br>
+                        </div>
+                    `;
+                    resultElement.appendChild(cheapestProductElement);
+
+                    // Display the highest rated product with full data
+                    const highestRatedProductElement = document.createElement("div");
+                    highestRatedProductElement.classList.add("card", "best-quality-card");
+                    highestRatedProductElement.innerHTML = `
+                        <h3>Best Quality Products Per Store:</h3>
+                        <div class="product-card">
+                            <strong>Product Name:</strong> ${highestRatedProduct.title}<br>
+                            <strong>Price:</strong> $${highestRatedProduct.price}<br>
+                            <strong>Link to Store:</strong> <a href="${highestRatedProduct.url}" target="_blank">View Product</a><br>
+                            <strong>Rating:</strong> ${highestRatedProduct.rating || "No ratings available"}<br>
+                        </div>
+                    `;
+                    resultElement.appendChild(highestRatedProductElement);
+
+                    // Separate the cheapest and best quality products per store
+                    const cheapestProductsSection = document.createElement("div");
+                    cheapestProductsSection.innerHTML = "<h3>Cheapest Products Per Store:</h3>";
+
+                    // Add the first two products to the "Cheapest Products" section
+                    if (products.length > 0) {
+                        products.slice(0, 2).forEach(product => {
+                            const productElement = document.createElement("div");
+                            productElement.classList.add("product-card");
+                            productElement.innerHTML = `
+                                <strong>Product Name:</strong> ${product.title}<br>
+                                <strong>Price:</strong> $${product.price}<br>
+                                <strong>Link to Store:</strong> <a href="${product.url}" target="_blank">View Product</a><br>
+                                <strong>Rating:</strong> ${product.rating || "No ratings available"}<br>
+                            `;
+                            cheapestProductsSection.appendChild(productElement);
+                        });
+                    }
+
+                    // Add the cheapest products section
+                    resultElement.appendChild(cheapestProductsSection);
+
+                    // Best Quality Products Section
+                    const bestQualityProductsSection = document.createElement("div");
+                    bestQualityProductsSection.innerHTML = "<h3>Best Quality Products Per Store:</h3>";
+
+                    // Add the last two products to the "Best Quality Products" section
+                    if (products.length > 2) {
+                        products.slice(-2).forEach(product => {
+                            const productElement = document.createElement("div");
+                            productElement.classList.add("product-card");
+                            productElement.innerHTML = `
+                                <strong>Product Name:</strong> ${product.title}<br>
+                                <strong>Price:</strong> $${product.price}<br>
+                                <strong>Link to Store:</strong> <a href="${product.url}" target="_blank">View Product</a><br>
+                                <strong>Rating:</strong> ${product.rating || "No ratings available"}<br>
+                            `;
+                            bestQualityProductsSection.appendChild(productElement);
+                        });
+                    }
+
+                    // Add the best quality products section
+                    resultElement.appendChild(bestQualityProductsSection);
+
+                } else {
+                    resultElement.textContent = "No products found.";
+                }
+            })
+            .catch(error => {
+                // Handle any error that might occur with the fetch
+                resultElement.textContent = "An error occurred while fetching the data.";
+            });
+        });
+
+
+    
+        // Crowdsourcing form submission
+        document.getElementById("crowdsourcing-form").addEventListener("submit", function (e) {
+            e.preventDefault();
+    
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+    
+            // Send POST request to crowdsourcing route
+            fetch("/crowdsourcing", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("crowdsourcingResult").textContent = data.message || "Error occurred.";
+                });
+        });
+    </script>
+    
+</body>
+</html>
+
+

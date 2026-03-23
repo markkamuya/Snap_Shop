@@ -1,0 +1,5 @@
+# Sensitive files
+.env
+venv/
+__pycache__/
+config.py

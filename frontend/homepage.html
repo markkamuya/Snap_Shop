@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapShop - Find the Best Prices</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* This ensures the body takes at least the full height of the viewport */
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        nav {
+            background-color: #3b82f6; /* Blue navigation bar */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* This will ensure space between elements */
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        nav .brand {
+            font-size: 2.0em;
+            color: white;
+            font-weight: bold;
+            position: absolute; /* Position the brand at the top-left corner */
+            left: 20px;
+        }
+        nav .nav-links {
+            display: flex;
+            gap: 1px; /* Space between the links */
+            
+        }
+        nav a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: color 0.3s;
+            margin: 0 10px; /* Add space between the tabs */
+        }
+
+        nav a:hover {
+            color: #ff6f00; /* Hover effect with orange */
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        section {
+            padding: 20px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            display: none; /* Hide sections initially */
+        }
+        section.active {
+            display: block; /* Show active section */
+        }
+        h2 {
+            color: #3b82f6; /* Purple */
+        }
+        .footer {
+            background-color: #3b82f6; /* Purple */
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            width: 100%;
+        }
+        .hidden {
+            display: none;
+        }
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 500px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #3b82f6; /* Purple */
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group button {
+            background-color: #3b82f6; /* Purple */
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        .form-group button:hover {
+            background-color: #ff6f00; /* Orange */
+        }
+        .password-strength {
+            font-size: 0.9em;
+            color: #666;
+        }
+        /* Social login styles */
+        .social-login {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .social-login button {
+            flex: 1;
+            margin-right: 10px;
+            padding: 10px;
+            background-color: #4285F4; /* Google color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .social-login button:last-child {
+            margin-right: 0; /* Remove margin for last button */
+            background-color: #3b5998; /* Facebook color */
+        }
+        .cards-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 30px;
+        }
+
+        .card {
+            background-color: #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            width: 250px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        .card h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .card p {
+            font-size: 1em;
+            color: white;
+        }
+        /* Center the Login Button */
+        .login-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .login-button {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .login-button:hover {
+            background-color: #ff6f00; /* Orange */
+        }
+        /* Responsive Design: Media Queries */
+        @media (max-width: 768px) {
+            nav .nav-links {
+                flex-direction: column; /* Stack the nav items vertically */
+                gap: 10px; /* Reduce space between links */
+                margin-top: 10px; /* Bring links closer to the brand name */
+            }
+
+            nav .brand {
+                position: relative; /* Reset position to default for mobile */
+                font-size: 1.5em; /* Smaller brand text */
+                top: 0;
+            }
+
+            .cards-container {
+                flex-direction: column; /* Stack the cards vertically */
+                align-items: center;
+            }
+
+            .card {
+                width: 90%; /* Make the cards take up 90% of the width */
+                margin-bottom: 20px; /* Add some space between the cards */
+            }
+
+            .login-button {
+                width: 90%; /* Make the button take up 90% of the width */
+            }
+        }
+
+        /* Adjusting for mobile devices */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column; /* Stack the nav items vertically */
+                align-items: center; /* Center the nav items */
+                justify-content: flex-start;
+            }
+
+            nav .brand {
+                position: relative; /* Reset position to default */
+                top: 0;
+                font-size: 1.5em; /* Smaller brand text */
+                margin-bottom: 10px; /* Add some space between brand and links */
+            }
+
+            nav .nav-links {
+                display: flex;
+                flex-direction: column; /* Stack the nav links vertically */
+                gap: 10px; /* Space between the links */
+                align-items: center; /* Center the links */
+            }
+
+            nav a {
+                font-size: 16px; /* Adjust font size for mobile */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <span class="brand">SnapShop</span> <!-- SnapShop text aligned to the left -->
+        <div>
+            <a href="#home" class="tab active">Home</a>
+            <a href="#about" class="tab">About Us</a>
+            <a href="#features" class="tab">Features</a>
+            <a href="#login" class="cta-button" id="loginButton">Login</a>
+            <a href="#signup" class="cta-button" id="signupButton">Sign Up</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="home" class="active">
+            <h2>Welcome to SnapShop</h2>
+            <p>At SnapShop, we are dedicated to helping you save money and time while shopping. Our mission is to provide a seamless shopping experience by finding the best deals in your area. Join our community and be part of the future of shopping!</p>
+        
+            <!-- Cards Section -->
+            <div class="cards-container">
+                <!-- Card 1: Mission -->
+                <div class="card">
+                    <h3>Mission</h3>
+                    <p>Effortlessly find the exact items you need, at the best prices, in your local stores.</p>
+                </div>
+                
+                <!-- Card 2: How We Do It -->
+                <div class="card">
+                    <h3>How We Do It</h3>
+                    <p>We connect you with real-time inventory data from businesses near you, powered by AI.</p>
+                </div>
+        
+                <!-- Card 3: Try It Now -->
+                <div class="card">
+                    <h3>Try It Now</h3>
+                    <p>Log in with Google/Facebook/Email to experience the future of local shopping.</p>
+                </div>
+            </div>
+        
+            <!-- Centered Login Button -->
+            <div class="login-button-container">
+                <button class="login-button" onclick="openModal('loginModal')">Login</button>
+            </div>  
+        </section>
+
+        <section id="about">
+            <h2>About Us</h2>
+            <p>SnapShop was founded with the goal of revolutionizing the shopping experience. We believe that everyone deserves to save money while enjoying their favorite products. Our platform is built on user feedback and innovation, ensuring that we always meet your needs.</p>
+        </section>
+
+        <section id="features">
+            <h2>More Features</h2>
+            <p>We are constantly improving our services and adding new features to enhance your shopping experience. Stay tuned for updates!</p>
+        </section>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 SnapShop. All rights reserved.</p>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeSignup">&times;</span>
+            <h2>Sign Up</h2>
+            <form id="signupForm" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label for="signupEmail">Email:</label>
+                    <input type="email" id="signupEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password:</label>
+                    <input type="password" id="signupPassword" required>
+                    <div class="password-strength">Password must be at least 8 characters long and include a mix of letters and numbers.</div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password:</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="fullName">Full Name:</label>
+                    <input type="text" id="fullName">
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number:</label>
+                    <input type="tel" id="phoneNumber">
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the <a href="#terms-of-service">terms and conditions</a>.</label>
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="marketingPreferences">
+                    <label for="marketingPreferences">I want to receive updates and promotions.</label>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Sign Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeLogin">&times;</span>
+            <h2>Login</h2>
+            <div class="social-login">
+                <button onclick="socialLogin('google')">Login with Google</button>
+                <button onclick="socialLogin('facebook')">Login with Facebook</button>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        
+        // JavaScript for tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        const sections = document.querySelectorAll('section');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.getAttribute('href').substring(1)).classList.add('active');
+            });
+        });
+
+                // Function to open modal by ID
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'block';
+        }
+
+        // Close modal when clicking outside of the modal
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+
+        // Modal control for Sign Up
+        const signupModal = document.getElementById('signupModal');
+        const signupButton = document.getElementById('signupButton');
+        const closeSignup = document.getElementById('closeSignup');
+
+        signupButton.onclick = function() {
+            signupModal.style.display = 'block';
+        }
+
+        closeSignup.onclick = function() {
+            signupModal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target === signupModal) {
+                signupModal.style.display = 'none';
+            }
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            // Handle the signup logic here
+            alert('Signup successful!');
+            window.location.href = '/index'; // Redirect after signup
+        }
+
+        // Modal control for Login
+        const loginModal = document.getElementById('loginModal');
+        const loginButton = document.getElementById('loginButton');
+        const closeLogin = document.getElementById('closeLogin');
+
+        loginButton.onclick = function() {
+            loginModal.style.display = 'block';
+        }
+
+        closeLogin.onclick = function() {
+            loginModal.style.display = 'none';
+        }
+
+        function socialLogin(provider) {
+            alert('Logging in with ' + provider);
+            // Handle social login logic here
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            // Handle the login logic here
+            alert('Login successful!');
+            window.location.href = '/index'; // Redirect after login
+        }
+
+        window.onclick = function(event) {
+            if (event.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
