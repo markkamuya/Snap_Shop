@@ -1,8 +1,13 @@
+import os
 import firebase_admin
 from firebase_admin import credentials, firestore
-from config import FIREBASE_CRED_PATH  # Import the Firebase credentials path
+
+FIREBASE_CRED_PATH = os.environ.get("FIREBASE_CRED_PATH")
 
 # Initialize Firebase Admin SDK
+if not FIREBASE_CRED_PATH:
+    raise RuntimeError("FIREBASE_CRED_PATH must point to a Firebase credentials file")
+
 cred = credentials.Certificate(FIREBASE_CRED_PATH)
 firebase_admin.initialize_app(cred)
 

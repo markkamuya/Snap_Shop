@@ -50,21 +50,19 @@ pip install -r requirements.txt
 
 ### 3. Configure environment variables
 
-Create a `config.py` file in the root directory:
+Set the required environment variables in your shell or deployment platform:
 
-```python
-# Example config.py
-
-OPENAI_API_KEY = "your_openai_api_key_here"
-EBAY_APP_ID = "your_ebay_app_id_here"
-RAPIDAPI_KEY = "your_rapidapi_key_here"
-SECRET_KEY = "your_flask_secret_key_here"
-
-MAIL_USERNAME = "your_email@example.com"
-MAIL_PASSWORD = "your_email_password_here"
+```bash
+export OPENAI_API_KEY="your_openai_api_key_here"
+export EBAY_APP_ID="your_ebay_app_id_here"
+export AMAZON_RAPIDAPI_KEY="your_rapidapi_key_here"
+export SECRET_KEY="your_flask_secret_key_here"
+export FIREBASE_CRED_PATH="/absolute/path/to/firebase-credentials.json"
+export MAIL_USERNAME="your_email@example.com"
+export MAIL_PASSWORD="your_email_password_here"
 ```
 
-Note: Keep `config.py` private. It is excluded from version control to protect sensitive credentials.
+Never commit these values or the Firebase credentials file. Tests use mocked API responses and do not require real credentials.
 
 ---
 
@@ -92,7 +90,7 @@ Snap_Shop/
 │
 ├── main.py                # Flask app entry point
 ├── requirements.txt       # Python dependencies
-├── config.py              # API keys (ignored by Git)
+├── tests/                 # Automated tests (external APIs are mocked)
 └── venv/                  # Virtual environment
 ```
 

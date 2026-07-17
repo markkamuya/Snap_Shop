@@ -1,6 +1,9 @@
+import os
 import requests
 import xml.etree.ElementTree as ET
-from config import EBAY_APP_ID, AMAZON_RAPIDAPI_KEY  # import private keys
+
+EBAY_APP_ID = os.environ.get("EBAY_APP_ID", "")
+AMAZON_RAPIDAPI_KEY = os.environ.get("AMAZON_RAPIDAPI_KEY", "")
 
 # Correct sandbox App ID
 app_id = EBAY_APP_ID  # Make sure this is the correct sandbox App ID
