@@ -10,12 +10,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, Email
 from backend.products import search_products
-from config import OPENAI_API_KEY
 
 # Initialize Flask app
 app = Flask(__name__)
-
-client = OpenAI(api_key=OPENAI_API_KEY)
 
 # App Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_default_secret_key')  # Update for production
@@ -50,6 +47,7 @@ def parse_location(store_location):
 def clean_user_input(user_input):
     """Use OpenAI's GPT-3/4 to extract product names from noisy input"""
     try:
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
